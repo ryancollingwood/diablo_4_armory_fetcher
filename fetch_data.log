@@ -1,0 +1,13 @@
+2023-06-10 12:09:59,159 - __main__ - DEBUG - getting env var: DATA_PATH
+2023-06-10 12:09:59,159 - __main__ - DEBUG - couldn't get env var DATA_PATH - using default: data
+2023-06-10 12:09:59,159 - __main__ - INFO - START EXECUTE
+2023-06-10 12:09:59,159 - __main__ - INFO - processing account: 100889067
+2023-06-10 12:09:59,159 - __main__ - INFO - fetching json: https://d4armory.io/api/100889067
+2023-06-10 12:10:00,101 - __main__ - INFO - fetcing character id: Donder - 70f56390-00d8-11ee-ada4-e1711f5a849b
+2023-06-10 12:10:00,101 - __main__ - INFO - fetching json: https://d4armory.io/api/100889067/70f56390-00d8-11ee-ada4-e1711f5a849b
+2023-06-10 12:10:00,591 - __main__ - INFO - has logged in since last check: True
+2023-06-10 12:10:00,592 - __main__ - INFO - fetcing character id: Neziha - 188b10e0-04db-11ee-a463-f9b52da7818d
+2023-06-10 12:10:00,592 - __main__ - INFO - fetching json: https://d4armory.io/api/100889067/188b10e0-04db-11ee-a463-f9b52da7818d
+2023-06-10 12:10:01,066 - __main__ - INFO - has logged in since last check: True
+2023-06-10 12:10:01,067 - __main__ - INFO - completed processing account: 100889067
+2023-06-10 12:10:01,067 - __main__ - INFO - COMPLETE EXECUTE
