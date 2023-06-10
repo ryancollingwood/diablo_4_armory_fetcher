@@ -11,7 +11,7 @@ def setup_logger(filename: str):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
     logger_file_handler = logging.handlers.RotatingFileHandler(
-        "{filename}.log",
+        f"{filename}.log",
         maxBytes=1024 * 1024,
         backupCount=1,
         encoding="utf8",
