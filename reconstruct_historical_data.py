@@ -36,7 +36,7 @@ if __name__ == "__main__":
     args, unknown = parser.parse_known_args()
 
     input_dir = args.input_dir
-    output_path = args.output_dir
+    output_dir = args.output_dir
     jsonl = args.jsonl
     glob_pattern = args.glob
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         file_suffix = json_file.suffix
 
         file_ext = json_file.suffix
-        output_path = Path(output_path) / json_file.parents[0].name
+        output_path = Path(output_dir) / json_file.parents[0].name
         
         revlist = (
             (commit, (commit.tree / str(json_file)).data_stream.read())
