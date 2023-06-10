@@ -20,10 +20,16 @@ To find your account id:
 
 ### Setup your Clone of this Repo
 - Clone this repo
+
+#### Setup Repo Secrets
 - In your repo on github head to `settings` -> `secrets` -> `actions`
 - Click `New repository secret`
 - Name your secret: `ACCOUNT_ID`
 - Enter the value of the account_id you fetched from `FenrisDebug.txt`
+
+#### Setup Repo Write Permissions
+- In your repo on github head to `settings` -> `actions`
+- Under `Workflow permissions` select `Read and write permissions`
 
 ## Details
 
