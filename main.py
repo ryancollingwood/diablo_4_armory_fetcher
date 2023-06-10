@@ -188,7 +188,7 @@ class Fetcher(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Diablo 4 Armory Fetcher")
-    parser.add_argument("account_id", help="Account ID to fetch", type=str, default=100889067, nargs='?')
+    parser.add_argument("account_id", help="Account ID to fetch", type=str, default=None, nargs='?')
     args, unknown = parser.parse_known_args()
 
     account_ids = None
