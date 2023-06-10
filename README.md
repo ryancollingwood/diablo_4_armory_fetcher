@@ -4,6 +4,11 @@ Use the unofficial Diablo 4 Armory https://d4armory.io/ to snapshot your charact
 
 Using this you can track your characters until/if Blizzard create an official API.
 
+## Details
+
+- Based off of https://github.com/patrickloeber/python-github-action-template for using Github actions to run on a schedule
+- By default the script is run every twelve hours as specified in `.github/workflows/actions.yml`. I'd caution against running this too often as it would put a load on the kind folks at d4armory.io
+
 ## Setup
 
 ### Find Your Account ID∏
@@ -19,7 +24,7 @@ To find your account id:
 - Confirm you can see your characters, there may be some latency
 
 ### Setup your Clone of this Repo
-- Clone this repo
+- Fork or Create a copy of this repo using the [Use this template](https://github.com/ryancollingwood/diablo_4_armory_fetcher/generate) button
 
 #### Setup Repo Secrets
 - In your repo on github head to `settings` -> `secrets` -> `actions`
@@ -32,11 +37,9 @@ To find your account id:
 - Under `Workflow permissions` select `Read and write permissions`
 - Click `save`
 
-## Details
-
-- Based off of https://github.com/patrickloeber/python-github-action-template for using Github actions to run on a scheduled
-- By default the script is run every twelve hours as specified in `.github/workflows/actions.yml`. I'd caution against running this too often as it would put a load on the kind folks at d4armory.io
-
-## TODO
-
-- Add a script (bash probably) to get all revisions of the character data commited to the repo
+## Constructing Data History
+- Clone the repo to your local computer
+- (Optional, but recommended) Create an python environment and activate it
+- Install the requirements - e.g. `pip install requirements.txt`
+- Run the following terminal command in the repo folder `python reconstruct_historical_data.py`
+- Your characters changes will be written by default as JSON line format to `data_history` directory
