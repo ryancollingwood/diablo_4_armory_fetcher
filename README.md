@@ -11,7 +11,7 @@ Using this you can track your characters until/if Blizzard create an official AP
 
 ## Setup
 
-### Find Your Account ID∏
+### Find Your Account ID
 
 To find your account id:
 - Open Diablo IV install directory
