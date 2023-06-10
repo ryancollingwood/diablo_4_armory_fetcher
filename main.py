@@ -22,18 +22,29 @@ def setup_logger():
     return logger
 
 class Fetcher(object):
-    def __init__(self) -> None:
+    def __init__(self, account_ids: List[str] = None) -> None:
         self.base_url = "https://d4armory.io/api"
+        self.logger = None
+
+        self.account_ids: List[str] = account_ids
+        if self.account_ids is None:
+            self.account_ids = self.get_account_ids()
+
+        if self.account_ids is None:
+            raise ValueError("No account ids to fetch, pass in value or set environment variable: ACCOUNT_ID")
+        
         self.logger: logging.Logger = setup_logger()
-        self.account_ids: List[str] = self.get_account_ids()
         self.data_path: Path = self.get_data_path()
 
     def get_environ_value(self, key: str, default_value = None) -> str:
-        self.logger.debug(f"getting env var: {key}")
+        logger = self.logger
+        if logger is not None:
+            logger.debug(f"getting env var: {key}")
         try:
             return os.environ[key]
         except KeyError:
-            self.logger.debug(f"couldn't get env var {key} - using default: {default_value}")
+            if logger is not None:
+                logger.debug(f"couldn't get env var {key} - using default: {default_value}")
             return default_value
         
     def dumps_json(self, obj) -> str:
@@ -55,11 +66,15 @@ class Fetcher(object):
             raise e
     
     def get_account_ids(self):
+        logger = self.logger
         try:
             accounts_ids = self.get_environ_value("ACCOUNT_ID")
+            if accounts_ids is None:
+                return None
             return accounts_ids.split(",")
         except Exception as e:
-            self.logger.exception(e)
+            if logger is not None:
+                logger.exception(e)
             raise e
         
     def get_data_path(self):
