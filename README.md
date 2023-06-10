@@ -30,6 +30,7 @@ To find your account id:
 #### Setup Repo Write Permissions
 - In your repo on github head to `settings` -> `actions`
 - Under `Workflow permissions` select `Read and write permissions`
+- Click `save`
 
 ## Details
 
