@@ -24,3 +24,7 @@ To find your account id:
 - Click `New repository secret`
 - Name your secret: `ACCOUNT_ID`
 - Enter the value of the account_id you fetched from `FenrisDebug.txt`
+
+## Details
+
+Based off of https://github.com/patrickloeber/python-github-action-template
