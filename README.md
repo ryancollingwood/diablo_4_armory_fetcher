@@ -27,4 +27,9 @@ To find your account id:
 
 ## Details
 
-Based off of https://github.com/patrickloeber/python-github-action-template
+- Based off of https://github.com/patrickloeber/python-github-action-template for using Github actions to run on a scheduled
+- By default the script is run every twelve hours as specified in `.github/workflows/actions.yml`. I'd caution against running this too often as it would put a load on the kind folks at d4armory.io
+
+## TODO
+
+- Add a script (bash probably) to get all revisions of the character data commited to the repo
