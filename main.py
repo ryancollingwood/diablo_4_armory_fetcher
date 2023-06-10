@@ -1,4 +1,5 @@
 import os
+import argparse
 import requests
 import json
 from pathlib import Path
@@ -6,11 +7,11 @@ from typing import Dict, List, Union
 import logging
 import logging.handlers
 
-def setup_logger():
+def setup_logger(filename: str):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
     logger_file_handler = logging.handlers.RotatingFileHandler(
-        "status.log",
+        "{filename}.log",
         maxBytes=1024 * 1024,
         backupCount=1,
         encoding="utf8",
@@ -18,6 +19,13 @@ def setup_logger():
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     logger_file_handler.setFormatter(formatter)
     logger.addHandler(logger_file_handler)
+
+    # std out logger
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+    logger.addHandler(console)
 
     return logger
 
@@ -33,7 +41,7 @@ class Fetcher(object):
         if self.account_ids is None:
             raise ValueError("No account ids to fetch, pass in value or set environment variable: ACCOUNT_ID")
         
-        self.logger: logging.Logger = setup_logger()
+        self.logger: logging.Logger = setup_logger("fetch_data")
         self.data_path: Path = self.get_data_path()
 
     def get_environ_value(self, key: str, default_value = None) -> str:
@@ -84,19 +92,58 @@ class Fetcher(object):
             return data_path
         except Exception as e:
             self.logger.exception(e)
-            raise e   
+            raise e
+        
+    def char_last_login(self, char_data_path :Path):
+        try:
+            exisiting_data: Dict = json.loads(char_data_path.read_text())
+            last_login = exisiting_data.get("lastLogin")
+            self.logger.info(f"last login: {last_login}")
+            return last_login
+        except Exception as e:
+            self.logger.exception(e)
+            return None
 
     def process_char(self, char_data: Dict, account_path: Path):
         try:
             char_id = char_data["id"]
-            self.logger.info(f"fetcing character id: {char_id}")
+            char_name = char_data["name"]
+
+            self.logger.info(f"fetcing character id: {char_name} - {char_id}")
             account_id: str = account_path.name
-            
+
+            output_path: Path = (account_path / f"{char_name}.json")
             char_details_data = self.get_json(f'{self.base_url}/{account_id}/{char_id}')
-            (account_path / f"{char_id}.json").write_text(self.dumps_json(char_details_data))
+            write_data = True
+
+            write_data = self.has_logged_since_last_check(output_path, char_details_data)
+            self.logger.info(f"has logged in since last check: {write_data}")
+
+            if write_data:
+                output_path.write_text(self.dumps_json(char_details_data))
+
         except Exception as e:
             self.logger.exception(e)
             raise e
+
+    def has_logged_since_last_check(self, output_path, char_details_data):
+        result = True
+
+        if output_path.exists():
+            last_login = self.char_last_login(output_path)
+            current_login = char_details_data.get("lastLogin")
+
+            if (last_login and current_login):
+                if (last_login != current_login):
+                    result = True
+                    output_path.write_text(self.dumps_json(char_details_data))
+                else:
+                    self.logger.warning("character hasn't logged in since last fetch")
+                    result = False
+            else:
+                result = True
+
+        return result
 
     def process_all_chars(self, all_chars_data: Dict, account_path: Path):
         try:
@@ -120,7 +167,7 @@ class Fetcher(object):
 
         data = self.get_json(f'{self.base_url}/{account_id}')
 
-        account_path = self.data_path / account_id
+        account_path = self.data_path / str(account_id)
         account_path.mkdir(exist_ok=True)
 
         (account_path / f"_.json").write_text(self.dumps_json(data))
@@ -137,6 +184,16 @@ class Fetcher(object):
         
         self.logger.info("COMPLETE EXECUTE")
 
+
+
 if __name__ == "__main__":
-    fetcher = Fetcher()
+    parser = argparse.ArgumentParser("Diablo 4 Armory Fetcher")
+    parser.add_argument("account_id", help="Account ID to fetch", type=str, default=100889067, nargs='?')
+    args, unknown = parser.parse_known_args()
+
+    account_ids = None
+    if args.account_id:
+        account_ids = [args.account_id]
+
+    fetcher = Fetcher(account_ids = account_ids)
     fetcher.execute()
