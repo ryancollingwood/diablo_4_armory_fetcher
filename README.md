@@ -43,3 +43,6 @@ To find your account id:
 - Install the requirements - e.g. `pip install requirements.txt`
 - Run the following terminal command in the repo folder `python reconstruct_historical_data.py`
 - Your characters changes will be written by default as JSON line format to `data_history` directory
+
+## TODO:
+- Check the status endpoint before proceeding with fetching chars 

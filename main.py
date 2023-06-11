@@ -63,12 +63,15 @@ class Fetcher(object):
             raise e
 
     def get_json(self, url: str) -> Union[List,Dict]:
-        self.logger.info(f"fetching json: {url}")
+        self.logger.debug(f"fetching json: {url}")
         try:
             r = requests.get(url)
 
             if r.status_code == 200:
                 return r.json()
+        except requests.exceptions.ConnectionError as e:
+            self.logger.error(f"connection error when accessing: {url}")
+            raise e
         except Exception as e:
             self.logger.exception(e)
             raise e
@@ -77,7 +80,7 @@ class Fetcher(object):
         logger = self.logger
         try:
             accounts_ids = self.get_environ_value("ACCOUNT_ID")
-            if accounts_ids is None:
+            if accounts_ids is None or not accounts_ids:
                 return None
             return accounts_ids.split(",")
         except Exception as e:
