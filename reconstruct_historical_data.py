@@ -5,6 +5,7 @@ from git import Repo
 
 
 def write_jsonl_changes(output_path, file_stem, revlist):
+    # produce jsonlines output see: https://jsonlines.org/ 
     output_file = output_path / f"{file_stem}.jsonl"
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -13,7 +14,7 @@ def write_jsonl_changes(output_path, file_stem, revlist):
             change_timestamp = int(commit.committed_datetime.timestamp())
             char_data = json.loads(filecontents.decode("utf8"))
             data = {"_timestamp": change_timestamp, "_hexsha": commit.hexsha, "data": char_data}
-            outfile.write(f"{data}\n")
+            outfile.write(f"{json.dumps(data)}\n")
 
 def write_individual_changes(output_path, file_stem, file_suffix, revlist):
     for commit, filecontents in revlist:
