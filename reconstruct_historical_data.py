@@ -52,10 +52,13 @@ if __name__ == "__main__":
         file_ext = json_file.suffix
         output_path = Path(output_dir) / json_file.parents[0].name
         
-        revlist = (
-            (commit, (commit.tree / str(json_file)).data_stream.read())
-            for commit in repo.iter_commits(paths=str(json_file))
-        )
+        try:
+            revlist = (
+                (commit, (commit.tree / str(json_file)).data_stream.read())
+                for commit in repo.iter_commits(paths=str(json_file))
+            )
+        except KeyError:
+            continue
 
         if jsonl:
             write_jsonl_changes(output_path, file_stem, revlist)
