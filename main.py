@@ -31,7 +31,7 @@ def setup_logger(filename: str):
 
 class Fetcher(object):
     def __init__(self, account_ids: List[str] = None) -> None:
-        self.base_url = "https://d4armory.io/api"
+        self.base_url = "https://d4armory.io/api/armory"
         self.logger = None
 
         self.account_ids: List[str] = account_ids
