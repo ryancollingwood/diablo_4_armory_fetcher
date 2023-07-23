@@ -2,8 +2,9 @@ import os
 import argparse
 import requests
 import json
+from time import sleep
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Any
 import logging
 import logging.handlers
 
@@ -39,7 +40,11 @@ class Fetcher(object):
             self.account_ids = self.get_account_ids()
 
         if self.account_ids is None:
-            raise ValueError("No account ids to fetch, pass in value or set environment variable: ACCOUNT_ID")
+            print("No account ids to fetch, pass in value or set environment variable: ACCOUNT_ID")
+            return
+        
+        self.profile_queue_attempts = int(self.get_environ_value("PROFILE_QUEUE_ATTEMPTS", "3"))
+        self.profile_queue_sleep = float(self.get_environ_value("PROFILE_QUEUE_ATTEMPTS", "5"))
         
         self.logger: logging.Logger = setup_logger("fetch_data")
         self.data_path: Path = self.get_data_path()
@@ -107,16 +112,29 @@ class Fetcher(object):
             self.logger.exception(e)
             return None
 
-    def process_char(self, char_data: Dict, account_path: Path):
+    def process_char(self, char_data: Dict, account_path: Path, attempt_num: int = 0):
         try:
-            char_id = char_data["id"]
-            char_name = char_data["name"]
+            char_id = char_data.get("id", None)
+            char_name = char_data.get("name", None)
 
-            self.logger.info(f"fetcing character id: {char_name} - {char_id}")
+            if not char_id or not char_name:
+                self.logger.error(f"Didn't get character id or name from response - char_id: {char_id} - char_name: {char_name}")
+                return
+
+            self.logger.info(f"fetching character id: {char_name} - {char_id}")
             account_id: str = account_path.name
 
             output_path: Path = (account_path / f"{char_name}.json")
-            char_details_data = self.get_json(f'{self.base_url}/{account_id}/{char_id}')
+            char_details_data: Dict[str, Any] = self.get_json(f'{self.base_url}/{account_id}/{char_id}')
+
+            if attempt_num < self.profile_queue_attempts:
+                queue: int = char_details_data.get("queue", -1)
+                if queue > 0:
+                    self.logger.info(f"queue position {queue} - sleeping for {self.profile_queue_attempts} seconds")
+                    sleep(self.profile_queue_attempts)
+                    self.process_char(char_data, account_path, attempt_num + 1)
+                    return
+
             write_data = True
 
             write_data = self.has_logged_since_last_check(output_path, char_details_data)
