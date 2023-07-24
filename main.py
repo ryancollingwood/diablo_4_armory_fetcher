@@ -209,7 +209,6 @@ class Fetcher(object):
         self.logger.info("COMPLETE EXECUTE")
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Diablo 4 Armory Fetcher")
     parser.add_argument("account_id", help="Account ID to fetch", type=str, default=None, nargs='?')
@@ -220,7 +219,5 @@ if __name__ == "__main__":
         account_ids = [args.account_id]
 
     fetcher = Fetcher(account_ids = account_ids)
-    if not fetcher.config_valid:
-        return
-        
-    fetcher.execute()
+    if fetcher.config_valid:        
+        fetcher.execute()
