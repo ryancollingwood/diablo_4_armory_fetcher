@@ -31,8 +31,9 @@ def setup_logger(filename: str):
     return logger
 
 class Fetcher(object):
-    def __init__(self, account_ids: List[str] = None) -> None:
+    def __init__(self, account_ids: List[str] = None) -> None:        
         self.base_url = "https://d4armory.io/api/armory"
+        self.config_valid = False
         self.logger = None
 
         self.account_ids: List[str] = account_ids
@@ -40,7 +41,7 @@ class Fetcher(object):
             self.account_ids = self.get_account_ids()
 
         if self.account_ids is None:
-            print("No account ids to fetch, pass in value or set environment variable: ACCOUNT_ID")
+            print("No account ids to fetch, pass in value or set environment variable: ACCOUNT_ID")            
             return
         
         self.profile_queue_attempts = int(self.get_environ_value("PROFILE_QUEUE_ATTEMPTS", "3"))
@@ -48,6 +49,8 @@ class Fetcher(object):
         
         self.logger: logging.Logger = setup_logger("fetch_data")
         self.data_path: Path = self.get_data_path()
+
+        self.config_valid = True
 
     def get_environ_value(self, key: str, default_value = None) -> str:
         logger = self.logger
@@ -217,4 +220,7 @@ if __name__ == "__main__":
         account_ids = [args.account_id]
 
     fetcher = Fetcher(account_ids = account_ids)
+    if not fetcher.config_valid:
+        return
+        
     fetcher.execute()
