@@ -127,7 +127,7 @@ class Fetcher(object):
             self.logger.info(f"fetching character id: {char_name} - {char_id}")
             account_id: str = account_path.name
 
-            output_path: Path = (account_path / f"{char_name}.json")
+            output_path: Path = (account_path / f"{char_name}_{char_id}.json")
             char_details_data: Dict[str, Any] = self.get_json(f'{self.base_url}/{account_id}/{char_id}')
 
             if attempt_num < self.profile_queue_attempts:
