@@ -5,6 +5,7 @@ from git import Repo
 
 
 def write_jsonl_changes(output_path, file_stem, revlist):
+    # produce jsonlines output see: https://jsonlines.org/
     output_file = output_path / f"{file_stem}.jsonl"
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
