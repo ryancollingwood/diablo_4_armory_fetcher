@@ -76,6 +76,14 @@ class Fetcher(object):
             r = requests.get(url)
 
             if r.status_code == 200:
+                data = r.json()
+
+                if isinstance(data, dict):
+                    error_message = data.get("error")
+
+                    if error_message:
+                        self.logger.warning(f"Error message in 200 response: {error_message}")
+
                 return r.json()
         except requests.exceptions.ConnectionError as e:
             self.logger.error(f"connection error when accessing: {url}")
@@ -105,10 +113,14 @@ class Fetcher(object):
             self.logger.exception(e)
             raise e
         
-    def char_last_login(self, char_data_path :Path):
+    def char_last_login(self, char_data_path: Union[Path, Dict]):
         try:
-            exisiting_data: Dict = json.loads(char_data_path.read_text())
-            last_login = exisiting_data.get("lastLogin")
+            if isinstance(char_data_path, dict):
+                exisiting_data = char_data_path
+            elif isinstance(char_data_path, Path):
+                exisiting_data: Dict = json.loads(char_data_path.read_text())
+            last_login_key = "u"
+            last_login = exisiting_data.get(last_login_key)
             self.logger.info(f"last login: {last_login}")
             return last_login
         except Exception as e:
@@ -117,8 +129,8 @@ class Fetcher(object):
 
     def process_char(self, char_data: Dict, account_path: Path, attempt_num: int = 0):
         try:
-            char_id = char_data.get("id", None)
-            char_name = char_data.get("name", None)
+            char_id = char_data.get("i", None)
+            char_name = char_data.get("n", None)
 
             if not char_id or not char_name:
                 self.logger.error(f"Didn't get character id or name from response - char_id: {char_id} - char_name: {char_name}")
@@ -128,7 +140,7 @@ class Fetcher(object):
             account_id: str = account_path.name
 
             output_path: Path = (account_path / f"{char_name}_{char_id}.json")
-            char_details_data: Dict[str, Any] = self.get_json(f'{self.base_url}/{account_id}/{char_id}')
+            char_details_data: Dict[str, Any] = self.get_json(f'{self.base_url}/{account_id}/{char_id}.json')
 
             if attempt_num < self.profile_queue_attempts:
                 queue: int = char_details_data.get("queue", -1)
@@ -149,31 +161,55 @@ class Fetcher(object):
         except Exception as e:
             self.logger.exception(e)
             raise e
+        
+    def char_data_is_different(self, new_data: Dict, old_data: Dict, ignore_keys: List[str]):
+        if not new_data or not old_data:
+            return True
 
-    def has_logged_since_last_check(self, output_path, char_details_data):
+        if new_data.keys() != old_data.keys():
+            return True
+        
+        for k, new_value in new_data.items():
+            if k in ignore_keys:
+                continue
+            if old_data.get(k) != new_value:
+                return True
+        
+        return False
+
+    def has_logged_since_last_check(self, output_path: Path, char_details_data: Dict):
         result = True
 
         if output_path.exists():
-            last_login = self.char_last_login(output_path)
-            current_login = char_details_data.get("lastLogin")
+            old_char_details_data: Dict = json.loads(output_path.read_text())
+            last_login = self.char_last_login(old_char_details_data)
+            last_login_key = "u"
+            current_login = char_details_data.get(last_login_key)
 
             if (last_login and current_login):
                 if (last_login != current_login):
                     result = True
-                    output_path.write_text(self.dumps_json(char_details_data))
                 else:
                     self.logger.warning("character hasn't logged in since last fetch")
                     result = False
             else:
                 result = True
+            
+            if result:
+                result = self.char_data_is_different(old_char_details_data, char_details_data, ["u", "au"])
+                if not result:
+                    self.logger.info("character may have logged in - but no changes")
 
         return result
 
-    def process_all_chars(self, all_chars_data: Dict, account_path: Path):
+    def process_all_chars(self, all_chars_data: List[Dict], account_path: Path):
         try:
-            character_data = all_chars_data.get("characters")
-            if character_data is None:
-                return
+            if isinstance(all_chars_data, dict):
+                character_data = all_chars_data.get("characters")
+                if character_data is None:
+                    return
+            elif isinstance(all_chars_data, list):
+                character_data = all_chars_data
                     
             for char_data in character_data:
                 try:
@@ -189,7 +225,7 @@ class Fetcher(object):
     def process_account(self, account_id: str):
         self.logger.info(f"processing account: {account_id}")
 
-        data = self.get_json(f'{self.base_url}/{account_id}')
+        data = self.get_json(f'{self.base_url}/{account_id}.json')
 
         account_path = self.data_path / str(account_id)
         account_path.mkdir(exist_ok=True)
