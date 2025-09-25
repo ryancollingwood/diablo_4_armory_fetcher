@@ -1,5 +1,11 @@
 # diablo_4_armory_fetcher
 
+## ⚠️ This repo is archived and will not be updated ⚠️ ##
+
+It seems the unofficial Diablo 4 Armory https://d4armory.io/ is no longer active.
+
+## Overview
+
 Use the unofficial Diablo 4 Armory https://d4armory.io/ to snapshot your characters data, combined with Github actions to fetch and store the data on a schedule
 
 Using this you can track your characters until/if Blizzard create an official API.
